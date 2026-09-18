@@ -1,0 +1,28 @@
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Frontend dependencies
+frontend/node_modules/
+
+# Frontend build files
+frontend/build/
+frontend/dist/
+
+# Go binaries
+backend/*.exe
+backend/*.out
+backend/bin/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# macOS
+.DS_Store
+
+# IDE files
+.idea/
+.vscode/
