@@ -24,7 +24,7 @@ func (r *WindowRepository) GetAllWindows() ([]models.Window, error) {
 	}
 	defer rows.Close()
 
-	var windows []models.Window
+	windows := make([]models.Window, 0)
 	for rows.Next() {
 		var window models.Window
 		err := rows.Scan(
@@ -37,6 +37,10 @@ func (r *WindowRepository) GetAllWindows() ([]models.Window, error) {
 			return nil, err
 		}
 		windows = append(windows, window)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return windows, nil
