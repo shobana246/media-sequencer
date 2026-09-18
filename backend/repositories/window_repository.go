@@ -14,20 +14,19 @@ func NewWindowRepository(db *sql.DB) *WindowRepository {
 		db: db,
 	}
 }
+
 func (r *WindowRepository) GetAllWindows() ([]models.Window, error) {
 	rows, err := r.db.Query(`
-    SELECT id, name, COALESCE(url, '') AS url, created_at, updated_at FROM windows
-	`)
+        SELECT id, name, created_at, updated_at FROM windows
+    `)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	var windows []models.Window
-
 	for rows.Next() {
 		var window models.Window
-
 		err := rows.Scan(
 			&window.ID,
 			&window.Name,
@@ -37,7 +36,6 @@ func (r *WindowRepository) GetAllWindows() ([]models.Window, error) {
 		if err != nil {
 			return nil, err
 		}
-
 		windows = append(windows, window)
 	}
 
@@ -46,16 +44,14 @@ func (r *WindowRepository) GetAllWindows() ([]models.Window, error) {
 
 func (r *WindowRepository) GetWindowByID(id int) (*models.Window, error) {
 	var window models.Window
-
 	err := r.db.QueryRow(`
-		SSELECT id, name, COALESCE(url, '') AS url, created_at, updated_at FROM windows WHERE id = ?
-	`, id).Scan(
+        SELECT id, name, created_at, updated_at FROM windows WHERE id = ?
+    `, id).Scan(
 		&window.ID,
 		&window.Name,
 		&window.CreatedAt,
 		&window.UpdatedAt,
 	)
-
 	if err != nil {
 		return nil, err
 	}
