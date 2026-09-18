@@ -17,22 +17,15 @@ func NewSyncRepository(db *sql.DB) *SyncRepository {
 
 func (r *SyncRepository) CreateSync(session models.SyncSession) error {
 	_, err := r.db.Exec(`
-		INSERT INTO sync_sessions 
-		(media_id, started_at, duration_seconds, ended_at, status, created_at)
-		VALUES (?, ?, ?, ?, ?, ?)
-	`,
-		session.MediaID,
-		session.StartedAt,
-		session.DurationSeconds,
-		session.EndedAt,
-		session.Status,
-		session.CreatedAt,
-	)
+		INSERT INTO sync_sessions (media_id, started_at, duration_seconds, status, created_at)
+		VALUES (?, ?, ?, ?, ?)
+	`, session.MediaID, session.StartedAt, session.DurationSeconds, session.Status, session.CreatedAt)
 	return err
 }
 
 func (r *SyncRepository) GetActiveSync() (*models.SyncSession, error) {
 	var session models.SyncSession
+	var endedAt sql.NullTime
 
 	err := r.db.QueryRow(`
 		SELECT id, media_id, started_at, duration_seconds, ended_at, status, created_at
@@ -45,7 +38,7 @@ func (r *SyncRepository) GetActiveSync() (*models.SyncSession, error) {
 		&session.MediaID,
 		&session.StartedAt,
 		&session.DurationSeconds,
-		&session.EndedAt,
+		&endedAt,
 		&session.Status,
 		&session.CreatedAt,
 	)
@@ -53,9 +46,12 @@ func (r *SyncRepository) GetActiveSync() (*models.SyncSession, error) {
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
-
 	if err != nil {
 		return nil, err
+	}
+
+	if endedAt.Valid {
+		session.EndedAt = endedAt.Time
 	}
 
 	return &session, nil
@@ -64,7 +60,7 @@ func (r *SyncRepository) GetActiveSync() (*models.SyncSession, error) {
 func (r *SyncRepository) CompleteSync(id int) error {
 	_, err := r.db.Exec(`
 		UPDATE sync_sessions
-		SET status = 'completed'
+		SET status = 'completed', ended_at = NOW()
 		WHERE id = ?
 	`, id)
 	return err
