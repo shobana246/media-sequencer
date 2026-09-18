@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"media-sequencer/config"
 	"media-sequencer/routes"
 	"media-sequencer/seed"
@@ -17,13 +19,23 @@ func main() {
 
 	router := gin.Default()
 
-	// add this
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:3000"
+	}
+
 	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:3000"},
+		AllowOrigins: []string{frontendURL},
 		AllowMethods: []string{"GET", "POST", "DELETE"},
 		AllowHeaders: []string{"Content-Type"},
 	}))
 
 	routes.SetupRoutes(router, db)
-	router.Run(":8080")
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	router.Run(":" + port)
 }
