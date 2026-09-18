@@ -24,11 +24,19 @@ func main() {
 		frontendURL = "http://localhost:3000"
 	}
 
-	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{frontendURL},
-		AllowMethods: []string{"GET", "POST", "DELETE"},
-		AllowHeaders: []string{"Content-Type"},
-	}))
+	// Add CORS middleware
+    router.Use(func(c *gin.Context) {
+        c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+        c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+        if c.Request.Method == "OPTIONS" {
+            c.AbortWithStatus(204)
+            return
+        }
+
+        c.Next()
+    })
 
 	routes.SetupRoutes(router, db)
 
