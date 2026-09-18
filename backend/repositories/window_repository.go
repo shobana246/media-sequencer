@@ -16,8 +16,7 @@ func NewWindowRepository(db *sql.DB) *WindowRepository {
 }
 func (r *WindowRepository) GetAllWindows() ([]models.Window, error) {
 	rows, err := r.db.Query(`
-		SELECT id, name, created_at, updated_at
-		FROM windows
+    SELECT id, name, COALESCE(url, '') AS url, created_at, updated_at FROM windows
 	`)
 	if err != nil {
 		return nil, err
@@ -49,9 +48,7 @@ func (r *WindowRepository) GetWindowByID(id int) (*models.Window, error) {
 	var window models.Window
 
 	err := r.db.QueryRow(`
-		SELECT id, name, created_at, updated_at
-		FROM windows
-		WHERE id = ?
+		SSELECT id, name, COALESCE(url, '') AS url, created_at, updated_at FROM windows WHERE id = ?
 	`, id).Scan(
 		&window.ID,
 		&window.Name,
